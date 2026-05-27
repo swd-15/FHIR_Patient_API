@@ -1,0 +1,15 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "p001",
+        "name": [{ "family": "山田", "given": ["太郎"] }],
+        "gender": "male",
+        "birthDate": "1980-04-15"
+      }
+    }
+  ]
+}
