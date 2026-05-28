@@ -1,4 +1,4 @@
-module github.com/swd15/FHIR_Patient_API
+module github.com/swd-15/FHIR_Patient_API
 
 go 1.26.2
 
