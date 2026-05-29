@@ -61,6 +61,81 @@ func FindPatient(bundle *Bundle, id string) (*PatientSummary, bool) {
 	return nil, false
 }
 
+//指定患者IDに紐づくConditionリソースを返す
+func FindConditions(bundle *Bundle, patientID string) []ConditionResponse {
+	var conditions []ConditionResponse
+	ref := "Patient/" + patientID
+	for _, entry := range bundle.Entry {
+		r := entry.Resource
+		if r.ResourceType != "Condition" {
+			continue
+		}
+		if r.Subject == nil || r.Subject.Reference != ref {
+			continue
+		}
+		display, code := extractCode(r.Code)
+		clinicalStatus := ""
+		if r.ClinicalStatus != nil && len(r.ClinicalStatus.Coding) > 0 {
+			clinicalStatus = r.ClinicalStatus.Coding[0].Code
+		}
+		conditions = append(conditions, ConditionResponse{
+			PatientID:      patientID,
+			Display:        display,
+			Code:           code,
+			ClinicalStatus: clinicalStatus,
+			OnsetDate:      r.OnsetDateTime,
+		})
+	}
+	return conditions
+}
+
+//指定患者IDに紐づくObservationリソースを返す
+func FindObservations(bundle *Bundle, patientID string) []ObservationResponse {
+	var observations []ObservationResponse
+	ref := "Patient/" + patientID
+	for _, entry := range bundle.Entry {
+		r := entry.Resource
+		if r.ResourceType != "Observation" {
+			continue
+		}
+		if r.Subject == nil || r.Subject.Reference != ref {
+			continue
+		}
+		display, code := extractCode(r.Code)
+		var value float64
+		unit := ""
+		if r.ValueQuantity != nil {
+			value = r.ValueQuantity.Value
+			unit = r.ValueQuantity.Unit
+		}
+		observations = append(observations, ObservationResponse{
+			PatientID:     patientID,
+			Display:       display,
+			Code:          code,
+			Value:         value,
+			Unit:          unit,
+			EffectiveDate: r.Effective,
+			Status:        r.Status,
+		})
+	}
+	return observations
+}
+
+//displayとcodeを取り出す
+func extractCode(cc *CodeableConcept) (display, code string) {
+	if cc == nil {
+		return "", ""
+	}
+	if len(cc.Coding) > 0 {
+		display = cc.Coding[0].Display
+		code = cc.Coding[0].Code
+	}
+	if display == "" {
+		display = cc.Text
+	}
+	return display, code
+}
+
 //姓名を結合して返す
 func buildFullName(r Resource) string {
 	if len(r.Name) == 0 {
