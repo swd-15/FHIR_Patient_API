@@ -147,15 +147,6 @@ handler.PatientHandler             ← HTTPリクエストを受け取る
 
 ---
 
-## 今後の拡張予定
-
-- [ ] 検査値の正常/異常判定
-- [ ] 患者ID・氏名による検索
-- [ ] Docker対応
-- [ ] 簡易フロントエンドの追加
-
----
-
 ## ライセンス
 
 [MIT License](./LICENSE)
