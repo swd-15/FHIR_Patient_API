@@ -1,0 +1,17 @@
+# Binary
+FHIR_Patient_API
+
+# Go
+*.exe
+*.test
+*.out
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# 環境変数
+.env
