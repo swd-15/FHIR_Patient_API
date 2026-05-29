@@ -30,3 +30,12 @@ func (s *PatientService) GetPatient(id string) (*fhir.PatientSummary, bool) {
 	return fhir.FindPatient(s.bundle, id)
 }
 
+//指定患者の疾患情報リストを返す
+func (s *PatientService) GetConditions(patientID string) []fhir.ConditionResponse {
+	return fhir.FindConditions(s.bundle, patientID)
+}
+
+//指定患者の検査値リストを返す
+func (s *PatientService) GetObservations(patientID string) []fhir.ObservationResponse {
+	return fhir.FindObservations(s.bundle, patientID)
+}

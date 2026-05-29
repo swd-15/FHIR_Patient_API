@@ -29,6 +29,15 @@ type Resource struct {
 	Subject *Reference       `json:"subject"`
 	Code    *CodeableConcept `json:"code"`
 	Status  string           `json:"status"`
+
+	// Condition
+	ClinicalStatus *CodeableConcept `json:"clinicalStatus"`
+	OnsetDateTime  string           `json:"onsetDateTime"`
+
+	// Observation
+	Category       []CodeableConcept `json:"category"`
+	Effective      string            `json:"effectiveDateTime"`
+	ValueQuantity  *Quantity         `json:"valueQuantity"`
 }
 
 //FHIR Reference型
@@ -55,4 +64,31 @@ type PatientSummary struct {
 	FullName  string `json:"full_name"`
 	Gender    string `json:"gender"`
 	BirthDate string `json:"birth_date"`
+}
+
+//疾患情報のレスポンス
+type ConditionResponse struct {
+	PatientID      string `json:"patient_id"`
+	Display        string `json:"display"`
+	Code           string `json:"code"`
+	ClinicalStatus string `json:"clinical_status"`
+	OnsetDate      string `json:"onset_date"`
+}
+
+//検査値のレスポンス
+type ObservationResponse struct {
+	PatientID     string  `json:"patient_id"`
+	Display       string  `json:"display"`
+	Code          string  `json:"code"`
+	Value         float64 `json:"value"`
+	Unit          string  `json:"unit"`
+	EffectiveDate string  `json:"effective_date"`
+	Status        string  `json:"status"`
+}
+
+type Quantity struct {
+	Value  float64 `json:"value"`
+	Unit   string  `json:"unit"`
+	System string  `json:"system"`
+	Code   string  `json:"code"`
 }

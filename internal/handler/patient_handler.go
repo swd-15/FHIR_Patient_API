@@ -25,6 +25,8 @@ func (h *PatientHandler) RegisterRoutes(r *gin.Engine) {
 	{
 		v1.GET("/patients", h.ListPatients)
 		v1.GET("/patients/:id", h.GetPatient)
+		v1.GET("/patients/:id/conditions", h.GetConditions)
+		v1.GET("/patients/:id/observations", h.GetObservations)
 	}
 }
 
@@ -51,4 +53,34 @@ func (h *PatientHandler) GetPatient(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, patient)
+}
+
+//指定患者の疾患情報を返す
+func (h *PatientHandler) GetConditions(c *gin.Context) {
+	id := c.Param("id")
+	if _, ok := h.svc.GetPatient(id); !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "patient not found", "id": id})
+		return
+	}
+	conditions := h.svc.GetConditions(id)
+	c.JSON(http.StatusOK, gin.H{
+		"patient_id": id,
+		"count":      len(conditions),
+		"conditions": conditions,
+	})
+}
+
+//指定患者の検査値情報を返す
+func (h *PatientHandler) GetObservations(c *gin.Context) {
+	id := c.Param("id")
+	if _, ok := h.svc.GetPatient(id); !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "patient not found", "id": id})
+		return
+	}
+	observations := h.svc.GetObservations(id)
+	c.JSON(http.StatusOK, gin.H{
+		"patient_id":   id,
+		"count":        len(observations),
+		"observations": observations,
+	})
 }
