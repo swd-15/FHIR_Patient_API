@@ -35,6 +35,11 @@ func (s *PatientService) GetConditions(patientID string) []fhir.ConditionRespons
 	return fhir.FindConditions(s.bundle, patientID)
 }
 
+//指定患者のアレルギー情報リストを返す
+func (s *PatientService) GetAllergies(PatientID string) []fhir.AllergyIntoleranceResponse{
+	return fhir.FindAllergies(s.bundle, PatientID)
+}
+
 //指定患者の検査値リストを返す
 func (s *PatientService) GetObservations(patientID string) []fhir.ObservationResponse {
 	return fhir.FindObservations(s.bundle, patientID)

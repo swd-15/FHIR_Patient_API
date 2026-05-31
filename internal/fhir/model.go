@@ -38,6 +38,10 @@ type Resource struct {
 	Category       []CodeableConcept `json:"category"`
 	Effective      string            `json:"effectiveDateTime"`
 	ValueQuantity  *Quantity         `json:"valueQuantity"`
+
+	// AllergyIntolerance
+	Patient     *Reference `json:"patient"`
+	Criticality string     `json:"criticality"`
 }
 
 //FHIR Reference型
@@ -73,6 +77,15 @@ type ConditionResponse struct {
 	Code           string `json:"code"`
 	ClinicalStatus string `json:"clinical_status"`
 	OnsetDate      string `json:"onset_date"`
+}
+
+//アレルギー情報のレスポンス
+type AllergyIntoleranceResponse struct {
+	PatientID      string `json:"patient_id"`
+	Display        string `json:"display"`
+	Code           string `json:"code"`
+	ClinicalStatus string `json:"clinical_status"`
+	Criticality    string `json:"criticality"`
 }
 
 //検査値のレスポンス

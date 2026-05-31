@@ -86,6 +86,16 @@ func TestGetConditionsEndpoint(t *testing.T) {
 	}
 }
 
+func TestGetAllergiesEndpoint(t *testing.T) {
+	r := setupRouter()
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/patients/p001/allergies", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status 200, got %d", w.Code)
+	}
+}
 //　/observationsが200を返すかチェック
 func TestGetObservationsEndpoint(t *testing.T) {
 	r := setupRouter()

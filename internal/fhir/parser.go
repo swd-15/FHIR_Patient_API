@@ -89,6 +89,34 @@ func FindConditions(bundle *Bundle, patientID string) []ConditionResponse {
 	return conditions
 }
 
+//指定患者IDに紐づくAllergyIntoleranceリソースを返す
+func FindAllergies(bundle *Bundle, patientID string) []AllergyIntoleranceResponse {
+	var allergies []AllergyIntoleranceResponse
+	ref := "Patient/" + patientID
+	for _, entry := range bundle.Entry {
+		r := entry.Resource
+		if r.ResourceType != "AllergyIntolerance" {
+			continue
+		}
+		if r.Patient == nil || r.Patient.Reference != ref {
+			continue
+		}
+		display, code := extractCode(r.Code)
+		clinicalStatus := ""
+		if r.ClinicalStatus != nil && len(r.ClinicalStatus.Coding) > 0 {
+			clinicalStatus = r.ClinicalStatus.Coding[0].Code
+		}
+		allergies = append(allergies, AllergyIntoleranceResponse{
+			PatientID:      patientID,
+			Display:        display,
+			Code:           code,
+			ClinicalStatus: clinicalStatus,
+			Criticality:    r.Criticality,
+		})
+	}
+	return allergies
+}
+
 //指定患者IDに紐づくObservationリソースを返す
 func FindObservations(bundle *Bundle, patientID string) []ObservationResponse {
 	var observations []ObservationResponse
