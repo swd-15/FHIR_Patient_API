@@ -20,6 +20,16 @@ func NewPatientService(bundlePath string) (*PatientService, error) {
 	return &PatientService{bundle: bundle}, nil
 }
 
+//FHIRサーバーから患者データを取得してServiceを初期化
+func NewPatientServiceFromFHIR(baseURL string, patientID string) (*PatientService, error) {
+	client := fhir.NewFHIRClient(baseURL)
+	bundle, err := client.FetchPatientEverything(patientID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch from FHIR server: %w", err)
+	}
+	return &PatientService{bundle: bundle}, nil
+}
+
 //全患者のサマリーリストを返す
 func (s *PatientService) ListPatients() []fhir.PatientSummary {
 	return fhir.ExtractPatients(s.bundle)

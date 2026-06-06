@@ -10,19 +10,28 @@ import (
 )
 
 func main() {
-	bundlePath := getEnv("BUNDLE_PATH", "sample/bundle.json")
 	port := getEnv("PORT", "8080")
 
-	// サービス初期化
-	svc, err := service.NewPatientService(bundlePath)
+	var svc *service.PatientService
+	var err error
+
+	// FHIR_MODEがserverの場合にFHIRサーバーから取得
+	if getEnv("FHIR_MODE", "file") == "server" {
+		baseURL := getEnv("FHIR_BASE_URL", "https://hapi.fhir.org/baseR4")
+		patientID := getEnv("FHIR_PATIENT_ID", "90293390")
+		log.Printf("Fetching from FHIR server: %s/Patient/%s", baseURL, patientID)
+		svc, err = service.NewPatientServiceFromFHIR(baseURL, patientID)
+	} else {
+		bundlePath := getEnv("BUNDLE_PATH", "sample/bundle.json")
+		log.Printf("Loading from file: %s", bundlePath)
+		svc, err = service.NewPatientService(bundlePath)
+	}
+
 	if err != nil {
 		log.Fatalf("Failed to initialize patient service: %v", err)
 	}
 
-	// ルーター設定
 	r := gin.Default()
-
-	// ハンドラー登録
 	h := handler.NewPatientHandler(svc)
 	h.RegisterRoutes(r)
 
