@@ -15,6 +15,10 @@ It reads healthcare data in HL7 FHIR Bundle format and provides patient, conditi
 | **患者情報API** | 患者一覧・詳細をREST APIで提供 |
 | **疾患情報API** | 患者に紐づくConditionリソースを提供 |
 | **検査値API** | 患者に紐づくObservationリソースを提供 |
+| **アレルギー情報API** | 患者に紐づくAllergyIntoleranceリソースを提供 |
+| **処方情報API** | 患者に紐づくMedicationRequestリソースを提供 |
+| **JP Core対応** | 日本標準コードシステム（ICD-10・JLAC10）に対応 |
+| **FHIRサーバー接続** | HAPI FHIRサーバーからリアルタイムでデータ取得 |
 
 ---
 
@@ -22,16 +26,20 @@ It reads healthcare data in HL7 FHIR Bundle format and provides patient, conditi
 
 ```go
 type Resource struct {
-    ResourceType   string           // Patient / Condition / Observation
-    ID             string           // 患者ID
-    Gender         string           // 性別
-    BirthDate      string           // 生年月日
-    Subject        *Reference       // 患者への参照（Condition/Observation）
-    Code           *CodeableConcept // 疾患・検査コード
-    ClinicalStatus *CodeableConcept // 臨床ステータス（active など）
-    OnsetDateTime  string           // 発症日
-    ValueQuantity  *Quantity        // 検査値（数値・単位）
-    Status         string           // Observationステータス
+    ResourceType              string           // Patient / Condition / Observation / AllergyIntolerance / MedicationRequest
+    ID                        string           // 患者ID
+    Gender                    string           // 性別
+    BirthDate                 string           // 生年月日
+    Subject                   *Reference       // 患者への参照
+    Code                      *CodeableConcept // 疾患・検査コード
+    ClinicalStatus            *CodeableConcept // 臨床ステータス（active など）
+    OnsetDateTime             string           // 発症日
+    ValueQuantity             *Quantity        // 検査値（数値・単位）
+    Status                    string           // ステータス
+    Patient                   *Reference       // 患者への参照（AllergyIntolerance）
+    Criticality               string           // 重篤度（AllergyIntolerance）
+    MedicationCodeableConcept *CodeableConcept // 薬剤コード（MedicationRequest）
+    DosageInstruction         []struct{ Text string } // 用法用量
 }
 ```
 
@@ -48,7 +56,8 @@ FHIR_Patient_API/
 ├── internal/
 │   ├── fhir/
 │   │   ├── model.go
-│   │   └── parser.go
+│   │   ├── parser.go
+│   │   └── client.go
 │   ├── service/
 │   │   └── patient_service.go
 │   └── handler/
@@ -75,16 +84,22 @@ cd FHIR_Patient_API
 go mod tidy
 ```
 
-### サーバー起動
+### ファイルモードで起動（デフォルト）
 
 ```bash
 go run main.go
 ```
 
+### FHIRサーバーモードで起動
+
+```bash
+FHIR_MODE=server FHIR_PATIENT_COUNT=5 go run main.go
+```
+
 ### テスト実行
 
 ```bash
-go test ./tests/...
+go test -v ./tests/...
 ```
 
 ---
@@ -98,6 +113,8 @@ go test ./tests/...
 | GET | /api/v1/patients/:id | 患者詳細取得 |
 | GET | /api/v1/patients/:id/conditions | 疾患情報取得 |
 | GET | /api/v1/patients/:id/observations | 検査値情報取得 |
+| GET | /api/v1/patients/:id/allergies | アレルギー情報取得 |
+| GET | /api/v1/patients/:id/medications | 処方情報取得 |
 
 ---
 
@@ -118,6 +135,12 @@ curl http://localhost:8080/api/v1/patients/p001/conditions
 
 # 検査値
 curl http://localhost:8080/api/v1/patients/p001/observations
+
+# アレルギー情報
+curl http://localhost:8080/api/v1/patients/p001/allergies
+
+# 処方情報
+curl http://localhost:8080/api/v1/patients/p001/medications
 ```
 
 ---
@@ -128,11 +151,12 @@ curl http://localhost:8080/api/v1/patients/p001/observations
 
 ```
 main.go
-  └─ service.NewPatientService()   ← bundle.json をロード
-        └─ fhir.LoadBundle()       ← JSONパース
-handler.PatientHandler             ← HTTPリクエストを受け取る
-  └─ service.PatientService        ← ビジネスロジック
-        └─ fhir.Extract*/Find*()   ← Bundleからリソース抽出
+  └─ service.NewPatientService()                ← bundle.json をロード
+  └─ service.NewPatientServiceFromFHIRMultiple() ← FHIRサーバーから取得
+        └─ fhir.LoadBundle() / FHIRClient        ← JSONパース・HTTP取得
+handler.PatientHandler                           ← HTTPリクエストを受け取る
+  └─ service.PatientService                      ← ビジネスロジック
+        └─ fhir.Extract*/Find*()                 ← Bundleからリソース抽出
 ```
 
 ---
@@ -144,6 +168,17 @@ handler.PatientHandler             ← HTTPリクエストを受け取る
 | Patient | 患者基本情報（氏名・性別・生年月日） |
 | Condition | 診断・疾患情報（病名・臨床ステータス・発症日） |
 | Observation | 検査値・バイタル情報（HbA1cなど） |
+| AllergyIntolerance | アレルギー情報（薬剤・食物アレルギーなど） |
+| MedicationRequest | 処方情報（薬剤名・用法用量） |
+
+---
+
+## 今後の拡張予定
+
+- [ ] 検査値の正常/異常判定
+- [ ] 患者ID・氏名による検索
+- [ ] Docker対応
+- [ ] 簡易フロントエンドの追加
 
 ---
 
