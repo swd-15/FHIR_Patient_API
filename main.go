@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -17,14 +18,16 @@ func main() {
 
 	// FHIR_MODEがserverの場合にFHIRサーバーから取得
 	if getEnv("FHIR_MODE", "file") == "server" {
-		baseURL := getEnv("FHIR_BASE_URL", "https://hapi.fhir.org/baseR4")
-		patientID := getEnv("FHIR_PATIENT_ID", "90293390")
-		log.Printf("Fetching from FHIR server: %s/Patient/%s", baseURL, patientID)
-		svc, err = service.NewPatientServiceFromFHIR(baseURL, patientID)
+	baseURL := getEnv("FHIR_BASE_URL", "https://hapi.fhir.org/baseR4")
+	countStr := getEnv("FHIR_PATIENT_COUNT", "5")
+	count := 5
+	fmt.Sscanf(countStr, "%d", &count)
+	log.Printf("Fetching %d patients from FHIR server: %s", count, baseURL)
+	svc, err = service.NewPatientServiceFromFHIRMultiple(baseURL, count)
 	} else {
-		bundlePath := getEnv("BUNDLE_PATH", "sample/bundle.json")
-		log.Printf("Loading from file: %s", bundlePath)
-		svc, err = service.NewPatientService(bundlePath)
+	bundlePath := getEnv("BUNDLE_PATH", "sample/bundle.json")
+	log.Printf("Loading from file: %s", bundlePath)
+	svc, err = service.NewPatientService(bundlePath)
 	}
 
 	if err != nil {
