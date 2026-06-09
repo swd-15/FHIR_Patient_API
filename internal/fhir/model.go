@@ -1,18 +1,18 @@
 package fhir
 
-//FHIR Bundleリソースのトップレベル構造体
+// FHIR Bundleリソースのトップレベル構造体
 type Bundle struct {
 	ResourceType string  `json:"resourceType"`
 	Type         string  `json:"type"`
 	Entry        []Entry `json:"entry"`
 }
 
-//Bundle内の各リソースエントリ
+// Bundle内の各リソースエントリ
 type Entry struct {
 	Resource Resource `json:"resource"`
 }
 
-//FHIRリソースの共通フィールドを持つ構造体
+// FHIRリソースの共通フィールドを持つ構造体
 type Resource struct {
 	ResourceType string `json:"resourceType"`
 
@@ -35,34 +35,39 @@ type Resource struct {
 	OnsetDateTime  string           `json:"onsetDateTime"`
 
 	// Observation
-	Category       []CodeableConcept `json:"category"`
-	Effective      string            `json:"effectiveDateTime"`
-	ValueQuantity  *Quantity         `json:"valueQuantity"`
+	Category      []CodeableConcept `json:"category"`
+	Effective     string            `json:"effectiveDateTime"`
+	ValueQuantity *Quantity         `json:"valueQuantity"`
 
 	// AllergyIntolerance
 	Patient     *Reference `json:"patient"`
 	Criticality string     `json:"criticality"`
+	// MedicationRequest
+	MedicationCodeableConcept *CodeableConcept `json:"medicationCodeableConcept"`
+	DosageInstruction         []struct {
+		Text string `json:"text"`
+	} `json:"dosageInstruction"`
 }
 
-//FHIR Reference型
+// FHIR Reference型
 type Reference struct {
 	Reference string `json:"reference"`
 }
 
-//コード+テキストによる概念表現
+// コード+テキストによる概念表現
 type CodeableConcept struct {
 	Coding []Coding `json:"coding"`
 	Text   string   `json:"text"`
 }
 
-//特定のコードシステムにおけるコード
+// 特定のコードシステムにおけるコード
 type Coding struct {
 	System  string `json:"system"`
 	Code    string `json:"code"`
 	Display string `json:"display"`
 }
 
-//患者一覧で返す簡略情報
+// 患者一覧で返す簡略情報
 type PatientSummary struct {
 	ID        string `json:"id"`
 	FullName  string `json:"full_name"`
@@ -70,7 +75,7 @@ type PatientSummary struct {
 	BirthDate string `json:"birth_date"`
 }
 
-//疾患情報のレスポンス
+// 疾患情報のレスポンス
 type ConditionResponse struct {
 	PatientID      string `json:"patient_id"`
 	Display        string `json:"display"`
@@ -79,7 +84,7 @@ type ConditionResponse struct {
 	OnsetDate      string `json:"onset_date"`
 }
 
-//アレルギー情報のレスポンス
+// アレルギー情報のレスポンス
 type AllergyIntoleranceResponse struct {
 	PatientID      string `json:"patient_id"`
 	Display        string `json:"display"`
@@ -88,7 +93,16 @@ type AllergyIntoleranceResponse struct {
 	Criticality    string `json:"criticality"`
 }
 
-//検査値のレスポンス
+// 処方情報のレスポンス
+type MedicationResponse struct {
+	PatientID string `json:"patient_id"`
+	Display   string `json:"display"`
+	Code      string `json:"code"`
+	Status    string `json:"status"`
+	Dosage    string `json:"dosage"`
+}
+
+// 検査値のレスポンス
 type ObservationResponse struct {
 	PatientID     string  `json:"patient_id"`
 	Display       string  `json:"display"`

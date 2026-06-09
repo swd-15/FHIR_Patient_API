@@ -86,6 +86,19 @@ func TestGetConditionsEndpoint(t *testing.T) {
 	}
 }
 
+//medicationsが200を返すかチェック
+func TestGetMedicationsEndpoint(t *testing.T){
+	r := setupRouter()
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/patients/p001/medications", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status 200, got %d", w.Code)
+	}
+}
+
+//allergiesが200を返すかチェック
 func TestGetAllergiesEndpoint(t *testing.T) {
 	r := setupRouter()
 	w := httptest.NewRecorder()
@@ -96,6 +109,7 @@ func TestGetAllergiesEndpoint(t *testing.T) {
 		t.Errorf("expected status 200, got %d", w.Code)
 	}
 }
+
 //　/observationsが200を返すかチェック
 func TestGetObservationsEndpoint(t *testing.T) {
 	r := setupRouter()

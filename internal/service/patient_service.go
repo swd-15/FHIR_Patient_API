@@ -50,6 +50,11 @@ func (s *PatientService) GetAllergies(PatientID string) []fhir.AllergyIntoleranc
 	return fhir.FindAllergies(s.bundle, PatientID)
 }
 
+//指定患者の処方情報リストを返す
+func (s *PatientService) GetMedications(PatientID string) []fhir.MedicationResponse{
+	return fhir.FindMedications(s.bundle, PatientID)
+}
+
 //指定患者の検査値リストを返す
 func (s *PatientService) GetObservations(patientID string) []fhir.ObservationResponse {
 	return fhir.FindObservations(s.bundle, patientID)

@@ -55,6 +55,25 @@ var testBundleJSON = []byte(`{
     },
     {
       "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "subject": {"reference": "Patient/p001"},
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "197844",
+              "display": "メトホルミン500mg"
+            }
+          ]
+        },
+        "dosageInstruction": [
+          {"text": "500mg 1日2回"}
+        ]
+      }
+    },
+    {
+      "resource": {
         "resourceType": "AllergyIntolerance",
         "patient": {"reference": "Patient/p001"},
         "code": {
@@ -78,8 +97,8 @@ func TestParseBundle(t *testing.T) {
 	if bundle.ResourceType != "Bundle" {
 		t.Errorf("expected resourceType=Bundle, got %s", bundle.ResourceType)
 	}
-	if len(bundle.Entry) != 5 {
-		t.Errorf("expected 5 entries, got %d", len(bundle.Entry))
+	if len(bundle.Entry) != 6 {
+		t.Errorf("expected 6 entries, got %d", len(bundle.Entry))
 	}
 }
 
@@ -146,6 +165,21 @@ func TestFindObservations(t *testing.T) {
 	}
 	if observations[0].Value != 7.8 {
 		t.Errorf("expected value=7.8, got %f", observations[0].Value)
+	}
+}
+
+// 処方情報が正しく取得できるか
+func TestFindMedications(t *testing.T) {
+	bundle, _ := fhir.ParseBundle(testBundleJSON)
+	medications := fhir.FindMedications(bundle, "p001")
+	if len(medications) != 1 {
+		t.Fatalf("expected 1 medication, got %d", len(medications))
+	}
+	if medications[0].Display != "メトホルミン500mg" {
+		t.Errorf("expected display=メトホルミン500mg, got %s", medications[0].Display)
+	}
+	if medications[0].Dosage != "500mg 1日2回" {
+		t.Errorf("expected dosage=500mg 1日2回, got %s", medications[0].Dosage)
 	}
 }
 

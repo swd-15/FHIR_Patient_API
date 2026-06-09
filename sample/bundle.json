@@ -101,6 +101,29 @@
                 },
                 "criticality": "high"
             }
+        },
+        {
+            "resource": {
+                "resourceType": "MedicationRequest",
+                "status": "active",
+                "subject": {
+                    "reference": "Patient/p001"
+                },
+                "medicationCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                            "code": "197844",
+                            "display": "メトホルミン500mg"
+                        }
+                    ]
+                },
+                "dosageInstruction": [
+                    {
+                        "text": "500mg 1日2回"
+                    }
+                ]
+            }
         }
     ]
 }

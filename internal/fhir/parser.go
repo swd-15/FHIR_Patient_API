@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-//JSONファイルからFHIR Bundleを読み込んでパースする
+// JSONファイルからFHIR Bundleを読み込んでパースする
 func LoadBundle(path string) (*Bundle, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -16,7 +16,7 @@ func LoadBundle(path string) (*Bundle, error) {
 	return ParseBundle(data)
 }
 
-//JSONバイト列をBundleにパースする
+// JSONバイト列をBundleにパースする
 func ParseBundle(data []byte) (*Bundle, error) {
 	var bundle Bundle
 	if err := json.Unmarshal(data, &bundle); err != nil {
@@ -25,7 +25,7 @@ func ParseBundle(data []byte) (*Bundle, error) {
 	return &bundle, nil
 }
 
-//BundleからPatientリソースのみを取り出す
+// BundleからPatientリソースのみを取り出す
 func ExtractPatients(bundle *Bundle) []PatientSummary {
 	var patients []PatientSummary
 	for _, entry := range bundle.Entry {
@@ -43,7 +43,7 @@ func ExtractPatients(bundle *Bundle) []PatientSummary {
 	return patients
 }
 
-//指定IDのPatientを返す
+// 指定IDのPatientを返す
 func FindPatient(bundle *Bundle, id string) (*PatientSummary, bool) {
 	for _, entry := range bundle.Entry {
 		r := entry.Resource
@@ -61,7 +61,7 @@ func FindPatient(bundle *Bundle, id string) (*PatientSummary, bool) {
 	return nil, false
 }
 
-//指定患者IDに紐づくConditionリソースを返す
+// 指定患者IDに紐づくConditionリソースを返す
 func FindConditions(bundle *Bundle, patientID string) []ConditionResponse {
 	var conditions []ConditionResponse
 	ref := "Patient/" + patientID
@@ -89,7 +89,7 @@ func FindConditions(bundle *Bundle, patientID string) []ConditionResponse {
 	return conditions
 }
 
-//指定患者IDに紐づくAllergyIntoleranceリソースを返す
+// 指定患者IDに紐づくAllergyIntoleranceリソースを返す
 func FindAllergies(bundle *Bundle, patientID string) []AllergyIntoleranceResponse {
 	var allergies []AllergyIntoleranceResponse
 	ref := "Patient/" + patientID
@@ -117,7 +117,34 @@ func FindAllergies(bundle *Bundle, patientID string) []AllergyIntoleranceRespons
 	return allergies
 }
 
-//指定患者IDに紐づくObservationリソースを返す
+func FindMedications(bundle *Bundle, patientID string) []MedicationResponse {
+	var medications []MedicationResponse
+	ref := "Patient/" + patientID
+	for _, entry := range bundle.Entry {
+		r := entry.Resource
+		if r.ResourceType != "MedicationRequest" {
+			continue
+		}
+		if r.Subject == nil || r.Subject.Reference != ref {
+			continue
+		}
+		display, code := extractCode(r.MedicationCodeableConcept)
+		dosage := ""
+		if len(r.DosageInstruction) > 0 {
+			dosage = r.DosageInstruction[0].Text
+		}
+		medications = append(medications, MedicationResponse{
+			PatientID: patientID,
+			Display:   display,
+			Code:      code,
+			Status:    r.Status,
+			Dosage:    dosage,
+		})
+	}
+	return medications
+}
+
+// 指定患者IDに紐づくObservationリソースを返す
 func FindObservations(bundle *Bundle, patientID string) []ObservationResponse {
 	var observations []ObservationResponse
 	ref := "Patient/" + patientID
@@ -149,7 +176,7 @@ func FindObservations(bundle *Bundle, patientID string) []ObservationResponse {
 	return observations
 }
 
-//displayとcodeを取り出す
+// displayとcodeを取り出す
 func extractCode(cc *CodeableConcept) (display, code string) {
 	if cc == nil {
 		return "", ""
@@ -164,7 +191,7 @@ func extractCode(cc *CodeableConcept) (display, code string) {
 	return display, code
 }
 
-//姓名を結合して返す
+// 姓名を結合して返す
 func buildFullName(r Resource) string {
 	if len(r.Name) == 0 {
 		return ""
