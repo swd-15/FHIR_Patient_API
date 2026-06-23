@@ -9,9 +9,7 @@
                 "name": [
                     {
                         "family": "山田",
-                        "given": [
-                            "太郎"
-                        ]
+                        "given": ["太郎"]
                     }
                 ],
                 "gender": "male",
@@ -21,9 +19,7 @@
         {
             "resource": {
                 "resourceType": "Condition",
-                "subject": {
-                    "reference": "Patient/p001"
-                },
+                "subject": { "reference": "Patient/p001" },
                 "code": {
                     "coding": [
                         {
@@ -48,9 +44,7 @@
             "resource": {
                 "resourceType": "Observation",
                 "status": "final",
-                "subject": {
-                    "reference": "Patient/p001"
-                },
+                "subject": { "reference": "Patient/p001" },
                 "category": [
                     {
                         "coding": [
@@ -79,10 +73,45 @@
         },
         {
             "resource": {
-                "resourceType": "AllergyIntolerance",
-                "patient": {
-                    "reference": "Patient/p001"
+                "resourceType": "Observation",
+                "status": "final",
+                "subject": { "reference": "Patient/p001" },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "laboratory"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "22322-2",
+                            "display": "HBs抗原（B型肝炎）"
+                        }
+                    ]
                 },
+                "effectiveDateTime": "2024-11-10",
+                "valueCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": "260385009",
+                            "display": "陰性"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "resource": {
+                "resourceType": "AllergyIntolerance",
+                "patient": { "reference": "Patient/p001" },
+                "allergyCategory": ["medication"],
                 "code": {
                     "coding": [
                         {
@@ -93,11 +122,7 @@
                     ]
                 },
                 "clinicalStatus": {
-                    "coding": [
-                        {
-                            "code": "active"
-                        }
-                    ]
+                    "coding": [{ "code": "active" }]
                 },
                 "criticality": "high"
             }
@@ -106,9 +131,7 @@
             "resource": {
                 "resourceType": "MedicationRequest",
                 "status": "active",
-                "subject": {
-                    "reference": "Patient/p001"
-                },
+                "subject": { "reference": "Patient/p001" },
                 "medicationCodeableConcept": {
                     "coding": [
                         {
@@ -119,9 +142,7 @@
                     ]
                 },
                 "dosageInstruction": [
-                    {
-                        "text": "500mg 1日2回"
-                    }
+                    { "text": "500mg 1日2回" }
                 ]
             }
         }

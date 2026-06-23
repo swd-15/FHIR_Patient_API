@@ -65,6 +65,11 @@ func (s *PatientService) GetMedications(PatientID string) []fhir.MedicationRespo
 	return fhir.FindMedications(s.bundle, PatientID)
 }
 
+//指定患者の感染症情報を返す
+func (s *PatientService) GetInfections(PatientID string) []fhir.InfectionResponse{
+	return fhir.FindInfections(s.bundle, PatientID)
+}
+
 //指定患者の検査値リストを返す
 func (s *PatientService) GetObservations(patientID string) []fhir.ObservationResponse {
 	return fhir.FindObservations(s.bundle, patientID)

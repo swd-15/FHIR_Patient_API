@@ -106,15 +106,55 @@ func FindAllergies(bundle *Bundle, patientID string) []AllergyIntoleranceRespons
 		if r.ClinicalStatus != nil && len(r.ClinicalStatus.Coding) > 0 {
 			clinicalStatus = r.ClinicalStatus.Coding[0].Code
 		}
+		category := ""
+		if len(r.AllergyCategory) > 0 {
+    		category = r.AllergyCategory[0]
+		}
 		allergies = append(allergies, AllergyIntoleranceResponse{
 			PatientID:      patientID,
 			Display:        display,
 			Code:           code,
 			ClinicalStatus: clinicalStatus,
 			Criticality:    r.Criticality,
+			Category:       category,
 		})
 	}
 	return allergies
+}
+
+func FindInfections(bundle *Bundle, patientID string) []InfectionResponse {
+	var infections []InfectionResponse
+	ref := "Patient/" + patientID
+	for _, entry := range bundle.Entry {
+		r := entry.Resource
+		if r.ResourceType != "Observation" {
+			continue
+		}
+		if r.Subject == nil || r.Subject.Reference != ref {
+			continue
+		}
+		// LOINCシステムの感染症コードのみ絞り込む
+		if r.Code == nil || len(r.Code.Coding) == 0 {
+			continue
+		}
+		if r.Code.Coding[0].System != "http://loinc.org" {
+			continue
+		}
+		display, code := extractCode(r.Code)
+		result := ""
+		if r.ValueCodeableConcept != nil && len(r.ValueCodeableConcept.Coding) > 0 {
+			result = r.ValueCodeableConcept.Coding[0].Display
+		}
+		infections = append(infections, InfectionResponse{
+			PatientID:     patientID,
+			Display:       display,
+			Code:          code,
+			Result:        result,
+			EffectiveDate: r.Effective,
+			Status:        r.Status,
+		})
+	}
+	return infections
 }
 
 func FindMedications(bundle *Bundle, patientID string) []MedicationResponse {
@@ -175,6 +215,7 @@ func FindObservations(bundle *Bundle, patientID string) []ObservationResponse {
 	}
 	return observations
 }
+
 
 // displayとcodeを取り出す
 func extractCode(cc *CodeableConcept) (display, code string) {

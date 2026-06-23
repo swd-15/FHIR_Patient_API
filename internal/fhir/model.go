@@ -35,13 +35,16 @@ type Resource struct {
 	OnsetDateTime  string           `json:"onsetDateTime"`
 
 	// Observation
-	Category      []CodeableConcept `json:"category"`
-	Effective     string            `json:"effectiveDateTime"`
-	ValueQuantity *Quantity         `json:"valueQuantity"`
+	Category               []CodeableConcept `json:"category"`
+	Effective              string            `json:"effectiveDateTime"`
+	ValueQuantity          *Quantity         `json:"valueQuantity"`
+	ValueCodeableConcept   *CodeableConcept  `json:"valueCodeableConcept"`
 
 	// AllergyIntolerance
-	Patient     *Reference `json:"patient"`
-	Criticality string     `json:"criticality"`
+	Patient         *Reference `json:"patient"`
+	Criticality     string     `json:"criticality"`
+	AllergyCategory []string   `json:"allergyCategory"`
+
 	// MedicationRequest
 	MedicationCodeableConcept *CodeableConcept `json:"medicationCodeableConcept"`
 	DosageInstruction         []struct {
@@ -86,11 +89,12 @@ type ConditionResponse struct {
 
 // アレルギー情報のレスポンス
 type AllergyIntoleranceResponse struct {
-	PatientID      string `json:"patient_id"`
-	Display        string `json:"display"`
-	Code           string `json:"code"`
-	ClinicalStatus string `json:"clinical_status"`
-	Criticality    string `json:"criticality"`
+    PatientID      string `json:"patient_id"`
+    Display        string `json:"display"`
+    Code           string `json:"code"`
+    ClinicalStatus string `json:"clinical_status"`
+    Criticality    string `json:"criticality"`
+    Category       string `json:"category"`
 }
 
 // 処方情報のレスポンス
@@ -111,6 +115,15 @@ type ObservationResponse struct {
 	Unit          string  `json:"unit"`
 	EffectiveDate string  `json:"effective_date"`
 	Status        string  `json:"status"`
+}
+
+type InfectionResponse struct {
+	PatientID     string `json:"patient_id"`
+	Display       string `json:"display"`
+	Code          string `json:"code"`
+	Result        string `json:"result"`
+	EffectiveDate string `json:"effective_date"`
+	Status        string `json:"status"`
 }
 
 type Quantity struct {

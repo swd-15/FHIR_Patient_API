@@ -29,6 +29,7 @@ func (h *PatientHandler) RegisterRoutes(r *gin.Engine) {
 		v1.GET("/patients/:id/allergies", h.GetAllergies)
 		v1.GET("/patients/:id/observations", h.GetObservations)
 		v1.GET("/patients/:id/medications", h.GetMedications)
+		v1.GET("/patients/:id/infections", h.GetInfections)
 	}
 }
 
@@ -114,5 +115,19 @@ func (h *PatientHandler) GetObservations(c *gin.Context) {
 		"patient_id":   id,
 		"count":        len(observations),
 		"observations": observations,
+	})
+}
+
+func (h *PatientHandler) GetInfections(c *gin.Context) {
+	id :=c.Param("id")
+	if _, ok := h.svc.GetPatient(id); !ok{
+		c.JSON(http.StatusNotFound, gin.H{"error": "patient not found","id": id})
+		return
+	}
+	infections := h.svc.GetInfections(id)
+	c.JSON(http.StatusOK, gin.H{
+		"patient_id":  id,
+		"count":       len(infections),
+		"infections": infections,
 	})
 }
