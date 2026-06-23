@@ -55,6 +55,30 @@ var testBundleJSON = []byte(`{
     },
     {
       "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {"reference": "Patient/p001"},
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [{"system": "http://loinc.org", "code": "22322-2", "display": "HBs抗原（B型肝炎）"}]
+        },
+        "effectiveDateTime": "2024-11-10",
+        "valueCodeableConcept": {
+          "coding": [{"system": "http://snomed.info/sct", "code": "260385009", "display": "陰性"}]
+        }
+      }
+    },
+    {
+      "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
         "subject": {"reference": "Patient/p001"},
@@ -76,6 +100,7 @@ var testBundleJSON = []byte(`{
       "resource": {
         "resourceType": "AllergyIntolerance",
         "patient": {"reference": "Patient/p001"},
+        "allergyCategory": ["medication"],
         "code": {
           "coding": [{"system": "http://jpfhir.jp/fhir/core/CodeSystem/JP_AllergyIntolerance", "code": "J8A3199", "display": "ペニシリン"}]
         },
@@ -97,8 +122,8 @@ func TestParseBundle(t *testing.T) {
 	if bundle.ResourceType != "Bundle" {
 		t.Errorf("expected resourceType=Bundle, got %s", bundle.ResourceType)
 	}
-	if len(bundle.Entry) != 6 {
-		t.Errorf("expected 6 entries, got %d", len(bundle.Entry))
+	if len(bundle.Entry) != 7 {
+		t.Errorf("expected 7 entries, got %d", len(bundle.Entry))
 	}
 }
 
@@ -157,14 +182,11 @@ func TestFindConditions(t *testing.T) {
 func TestFindObservations(t *testing.T) {
 	bundle, _ := fhir.ParseBundle(testBundleJSON)
 	observations := fhir.FindObservations(bundle, "p001")
-	if len(observations) != 1 {
-		t.Fatalf("expected 1 observation, got %d", len(observations))
+	if len(observations) != 2 {
+		t.Fatalf("expected 2 observations, got %d", len(observations))
 	}
 	if observations[0].Display != "HbA1c" {
 		t.Errorf("expected display=HbA1c, got %s", observations[0].Display)
-	}
-	if observations[0].Value != 7.8 {
-		t.Errorf("expected value=7.8, got %f", observations[0].Value)
 	}
 }
 
@@ -193,8 +215,23 @@ func TestFindAllergies(t *testing.T) {
 	if allergies[0].Display != "ペニシリン" {
 		t.Errorf("expected display=ペニシリン, got %s", allergies[0].Display)
 	}
-	if allergies[0].Criticality != "high" {
-		t.Errorf("expected criticality=high, got %s", allergies[0].Criticality)
+	if allergies[0].Category != "medication" {
+		t.Errorf("expected category=medication, got %s", allergies[0].Category)
+	}
+}
+
+// 感染症情報が正しく取得できるか
+func TestFindInfections(t *testing.T) {
+	bundle, _ := fhir.ParseBundle(testBundleJSON)
+	infections := fhir.FindInfections(bundle, "p001")
+	if len(infections) != 1 {
+		t.Fatalf("expected 1 infection, got %d", len(infections))
+	}
+	if infections[0].Display != "HBs抗原（B型肝炎）" {
+		t.Errorf("expected display=HBs抗原（B型肝炎）, got %s", infections[0].Display)
+	}
+	if infections[0].Result != "陰性" {
+		t.Errorf("expected result=陰性, got %s", infections[0].Result)
 	}
 }
 

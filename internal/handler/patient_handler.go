@@ -118,6 +118,7 @@ func (h *PatientHandler) GetObservations(c *gin.Context) {
 	})
 }
 
+//指定患者の感染症情報を返す
 func (h *PatientHandler) GetInfections(c *gin.Context) {
 	id :=c.Param("id")
 	if _, ok := h.svc.GetPatient(id); !ok{
